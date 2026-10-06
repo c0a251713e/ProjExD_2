@@ -2,6 +2,7 @@ import os
 import pygame as pg
 import random
 import sys
+import time
 
 
 WIDTH, HEIGHT = 1100, 650
@@ -12,6 +13,28 @@ DELTA = {pg.K_UP:(0,-5),
         }
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+
+def gameover(screen: pg.Surface) -> None:
+    """
+    引数：screenのSurface
+    戻り値：なし
+    文字と画像を表示
+    """
+    black_img = pg.Surface((WIDTH, HEIGHT))
+    pg.draw.rect(black_img, (0, 0, 0), (0, 0, 10000, 10000), width=0)
+    black_img.set_alpha(200)
+    screen.blit(black_img, [0, 0])
+
+    fonto = pg.font.Font(None, 80)
+    txt = fonto.render("Game Over", True, (255, 255, 255))
+    screen.blit(txt, [500, 250])
+
+    shock_img = pg.image.load("fig/8.png")
+    screen.blit(shock_img, [0, 300])
+    screen.blit(shock_img, [500, 300])
+    pg.display.update()
+    time.sleep(5)
 
 
 def check_bound(rect: pg.Rect) -> tuple[bool, bool]:
@@ -51,6 +74,7 @@ def main():
 
         if kk_rct.colliderect(bb_rct): # kkとbbのrectが重なっていたら
             print("game over")
+            gameover(screen)
             return
 
         key_lst = pg.key.get_pressed()
