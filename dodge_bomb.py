@@ -10,9 +10,22 @@ DELTA = {pg.K_UP:(0,-5),
          pg.K_LEFT:(-5,0),
          pg.K_RIGHT:(5,0)
         }
-vx = 5
-vy = 5
+
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+
+def check_bound(rect: pg.Rect) -> tuple[bool, bool]:
+    """
+    引数：こうかとんまたは爆弾のRect
+    戻り値：タプル（横方向判定結果,縦方向判定結果）
+    画面内ならTrue,画面外ならFalese
+    """
+    yoko, tate = True, True
+    if rect.left < 0 or WIDTH < rect.right:
+        yoko = False
+    if rect.top < 0 or HEIGHT < rect.bottom:
+        tate = False
+    return yoko, tate
 
 
 def main():
@@ -27,6 +40,7 @@ def main():
     bb_img.set_colorkey((0,0,0))
     bb_rct = bb_img.get_rect()
     bb_rct.center = (random.randint(0,WIDTH),random.randint(0,HEIGHT))
+    vx, vy = 5, 5
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -49,14 +63,21 @@ def main():
 
         for k,tpl in DELTA.items():
             if key_lst[k]:
-                sum_mv[0] += tpl[0]
-                sum_mv[1] += tpl[1]
+                sum_mv[0] += tpl[0] # 縦方向移動
+                sum_mv[1] += tpl[1] # 横方向移動
         kk_rct.move_ip(sum_mv)
+        if check_bound(kk_rct) != (True, True): # どこかしらはみ出ている
+            kk_rct.move_ip(-sum_mv[0], -sum_mv[1]) # その動きをキャンセル
         screen.blit(kk_img, kk_rct)
 
         bb_rct.move_ip(vx, vy)
+        yoko, tate = check_bound(bb_rct)
+        if not yoko:
+            vx *= -1
+        if not tate:
+            vy *= -1
         screen.blit(bb_img, bb_rct)
-        
+    
         pg.display.update()
         tmr += 1
         clock.tick(50)
