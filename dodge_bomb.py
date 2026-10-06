@@ -37,6 +37,21 @@ def gameover(screen: pg.Surface) -> None:
     time.sleep(5)
 
 
+def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+    """
+    引数：なし
+    戻り値：タプル(爆弾の大きさSurfaceリスト, 加速度intリスト)
+    """    
+    bb_imgs = []
+    for r in range(1, 11):
+        bb_img = pg.Surface((20*r, 20*r))
+        pg.draw.circle(bb_img, (255, 0, 0), (10*r, 10*r), 10*r)
+        bb_imgs.append(bb_img)
+        bb_accs = [a for a in range(1, 11)]
+    
+    return (bb_imgs, bb_accs)
+
+
 def check_bound(rect: pg.Rect) -> tuple[bool, bool]:
     """
     引数：こうかとんまたは爆弾のRect
@@ -66,6 +81,12 @@ def main():
     vx, vy = 5, 5
     clock = pg.time.Clock()
     tmr = 0
+    bb_imgs = init_bb_imgs()[0]
+    bb_accs = init_bb_imgs()[1]
+    avx = vx*bb_accs[min(tmr//500, 9)]
+    avy = avx
+    bb_img = bb_imgs[min(tmr//500, 9)]
+
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
@@ -98,14 +119,45 @@ def main():
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1]) # その動きをキャンセル
         screen.blit(kk_img, kk_rct)
 
-        bb_rct.move_ip(vx, vy)
+        if tmr == 100:
+            avx = bb_accs[9]
+            avy = avx
+        elif tmr == 90:
+            avx = bb_accs[8]
+            avy = avx
+        elif tmr == 80:
+            avx = bb_accs[7]
+            avy = avx
+        elif tmr == 70:
+            avx = bb_accs[6]
+            avy = avx
+        elif tmr == 60:
+            avx = bb_accs[5]
+            avy = avx
+        elif tmr == 50:
+            avx = bb_accs[4]
+            avy = avx
+        elif tmr == 40:
+            avx = bb_accs[3]
+            avy = avx
+        elif tmr == 30:
+            avx = bb_accs[2]
+            avy = avx
+        elif tmr == 20:
+            avx = bb_accs[1]
+            avy = avx
+        elif tmr == 10:
+            avx = bb_accs[0]
+            avy = avx
+
+        bb_rct.move_ip(avx, avy)
         yoko, tate = check_bound(bb_rct)
         if not yoko:
-            vx *= -1
+            avx *= -1
         if not tate:
-            vy *= -1
+            avy *= -1
         screen.blit(bb_img, bb_rct)
-    
+            
         pg.display.update()
         tmr += 1
         clock.tick(50)
